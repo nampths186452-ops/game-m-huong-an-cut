@@ -1,4 +1,5 @@
-const { QUESTIONS, AUCTION_ITEMS } = require('./gameData');
+const { QUESTIONS } = require('./gameData');
+
 const AUCTION_ITEMS = [
   {
     id: 1,
