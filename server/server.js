@@ -76,4 +76,142 @@ io.on('connection', (socket) => {
       });
       room.players.add(token);
     } else {
-      const p =
+      const p = players.get(token);
+      p.socketId = socket.id;
+      p.online = true;
+    }
+    
+    socket.join(roomId);
+    broadcastRoom(roomId);
+  });
+
+  // --- LOGIC TRẢ LỜI CÂU HỎI ---
+  socket.on('startQuiz', ({ roomId, token }) => {
+    adminOnly(roomId, token, () => {
+      const room = rooms.get(roomId);
+      if (room) {
+        room.phase = 'QUIZ';
+        room.quiz.currentQuestionIndex = 0;
+        const currentQuestion = QUESTIONS[0];
+        if (currentQuestion) io.to(roomId).emit('newQuestion', currentQuestion);
+        broadcastRoom(roomId);
+      }
+    });
+  });
+
+  socket.on('nextQuestion', ({ roomId, token }) => {
+    adminOnly(roomId, token, () => {
+      const room = rooms.get(roomId);
+      if (room) {
+        room.quiz.currentQuestionIndex++;
+        const currentQuestion = QUESTIONS[room.quiz.currentQuestionIndex];
+        
+        if (currentQuestion) {
+          room.quiz.readyPlayers.clear(); 
+          room.players.forEach(playerToken => {
+             const p = players.get(playerToken);
+             if (p) p.hasAnswered = false; // Mở khoá nút bấm
+          });
+          io.to(roomId).emit('newQuestion', currentQuestion);
+        } else {
+          room.phase = 'AUCTION'; // Hết câu hỏi thì sang Đấu giá
+          io.to(roomId).emit('quizFinished');
+        }
+        broadcastRoom(roomId);
+      }
+    });
+  });
+
+  socket.on('submitAnswer', ({ roomId, token, answerIndex }) => {
+    const room = rooms.get(roomId);
+    const player = players.get(token);
+    
+    if (room && player && room.phase === 'QUIZ') {
+      if (player.hasAnswered) return; // Chống bấm 2 lần
+      player.hasAnswered = true;
+      
+      const currentQuestion = QUESTIONS[room.quiz.currentQuestionIndex];
+      if (currentQuestion) {
+        player.answers[room.quiz.currentQuestionIndex] = answerIndex;
+        
+        // Kiểm tra đúng sai và cộng tiền (Mỗi câu đúng +100$)
+        const isCorrect = (answerIndex === currentQuestion.correctIndex);
+        if (isCorrect) {
+          player.balance += 100; 
+        }
+      }
+      
+      room.quiz.readyPlayers.add(token);
+      broadcastRoom(roomId);
+    }
+  });
+
+  // --- LOGIC ĐẤU GIÁ ---
+  socket.on('startAuctionItem', ({ roomId, token }) => {
+    adminOnly(roomId, token, () => {
+      const room = rooms.get(roomId);
+      if (room && room.phase === 'AUCTION') {
+        room.auction.status = 'OPEN';
+        room.auction.currentPrice = 0;
+        room.auction.leadingBidderToken = null;
+        broadcastRoom(roomId);
+      }
+    });
+  });
+
+  socket.on('placeBid', ({ roomId, token, bidAmount }) => {
+    const room = rooms.get(roomId);
+    const player = players.get(token);
+    
+    if (room && player && room.phase === 'AUCTION' && room.auction.status === 'OPEN') {
+      // Lấy giá khởi điểm hoặc giá tiếp theo
+      const basePrice = AUCTION_ITEMS[room.auction.currentItemIndex]?.basePrice || 50;
+      const nextPrice = room.auction.currentPrice === 0 ? basePrice : room.auction.currentPrice + 50;
+      
+      // Kiểm tra người chơi có đủ tiền và ra giá hợp lệ không
+      if (bidAmount >= nextPrice && player.balance >= bidAmount) {
+        room.auction.currentPrice = bidAmount;
+        room.auction.leadingBidderToken = token;
+        broadcastRoom(roomId);
+      }
+    }
+  });
+
+  socket.on('sellItem', ({ roomId, token }) => {
+    adminOnly(roomId, token, () => {
+      const room = rooms.get(roomId);
+      if (room && room.phase === 'AUCTION') {
+        const winnerToken = room.auction.leadingBidderToken;
+        if (winnerToken) {
+          const winner = players.get(winnerToken);
+          if (winner) {
+            winner.balance -= room.auction.currentPrice; // Trừ tiền người thắng
+            room.results.push({
+              item: AUCTION_ITEMS[room.auction.currentItemIndex],
+              winner: winner.username,
+              price: room.auction.currentPrice
+            });
+          }
+        }
+        
+        // Chuyển sang đồ tiếp theo
+        room.auction.status = 'WAITING';
+        room.auction.currentItemIndex++;
+        
+        if (room.auction.currentItemIndex >= AUCTION_ITEMS.length) {
+          room.phase = 'FINISHED'; // Hết đồ thì kết thúc game
+        }
+        broadcastRoom(roomId);
+      }
+    });
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Ngắt kết nối:', socket.id);
+  });
+});
+
+const PORT = process.env.PORT || 10000;
+server.listen(PORT, () => {
+  console.log(`Máy chủ đang chạy mượt mà trên cổng ${PORT}`);
+});
