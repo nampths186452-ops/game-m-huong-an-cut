@@ -240,23 +240,3 @@ const questions = [
     correctIndex: 2
   }
 ];
-const AUCTION_ITEMS = [
-  {
-    id: 1,
-    name: "Cổ vật Hoàng gia 1",
-    basePrice: 100, // Giá khởi điểm
-    image: "link_anh_neu_co"
-  },
-  {
-    id: 2,
-    name: "Cổ vật Hoàng gia 2",
-    basePrice: 200,
-    image: "link_anh_neu_co"
-  },
-  {
-    id: 3,
-    name: "Cổ vật Hoàng gia 3",
-    basePrice: 300,
-    image: "link_anh_neu_co"
-  }
-];

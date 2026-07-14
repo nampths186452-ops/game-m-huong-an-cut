@@ -1,4 +1,16 @@
 const { QUESTIONS, AUCTION_ITEMS } = require('./gameData');
+const AUCTION_ITEMS = [
+  {
+    id: 1,
+    name: "Vật phẩm 1",
+    basePrice: 100
+  },
+  {
+    id: 2,
+    name: "Vật phẩm 2",
+    basePrice: 200
+  }
+];
 
 // Lưu trữ toàn bộ trên RAM
 const rooms = new Map();
