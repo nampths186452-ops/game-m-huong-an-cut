@@ -1,17 +1,4 @@
-const { QUESTIONS } = require('./gameData');
-
-const AUCTION_ITEMS = [
-  {
-    id: 1,
-    name: "Vật phẩm 1",
-    basePrice: 100
-  },
-  {
-    id: 2,
-    name: "Vật phẩm 2",
-    basePrice: 200
-  }
-];
+const { AUCTION_ITEMS } = require('./gameData');
 
 // Lưu trữ toàn bộ trên RAM
 const rooms = new Map();
@@ -68,6 +55,15 @@ const getRoomSafe = (roomId) => {
     }).filter(Boolean)
   }));
 
+  // Lấy giá basePrice một cách an toàn
+  let nextBidPrice = 50; 
+  if (room.auction.currentPrice === 0) {
+    const currentItem = AUCTION_ITEMS[room.auction.currentItemIndex];
+    nextBidPrice = currentItem ? currentItem.basePrice : 50;
+  } else {
+    nextBidPrice = room.auction.currentPrice + 50;
+  }
+
   return {
     id: room.id,
     phase: room.phase,
@@ -78,7 +74,7 @@ const getRoomSafe = (roomId) => {
       online: p.online,
       balance: p.balance,
       teamId: p.teamId,
-      token: p.token // Gửi token để nhận diện chính mình, client tự filter
+      token: p.token 
     })),
     teams: teamsData,
     quiz: {
@@ -91,7 +87,7 @@ const getRoomSafe = (roomId) => {
       currentPrice: room.auction.currentPrice,
       status: room.auction.status,
       leadingBidderName: getBidderName(room.auction.leadingBidderToken, room.auction.leadingBidderIsTeam),
-      nextPrice: room.auction.currentPrice === 0 ? AUCTION_ITEMS[room.auction.currentItemIndex]?.basePrice : room.auction.currentPrice + 50
+      nextPrice: nextBidPrice
     },
     results: room.results
   };

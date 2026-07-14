@@ -240,4 +240,11 @@ const QUESTIONS = [
     correctIndex: 2
   }
 ];
-module.exports = { QUESTIONS };
+
+const AUCTION_ITEMS = [
+  { id: 1, name: "Vật phẩm 1", basePrice: 100 },
+  { id: 2, name: "Vật phẩm 2", basePrice: 200 },
+  { id: 3, name: "Vật phẩm 3", basePrice: 300 }
+];
+
+module.exports = { QUESTIONS, AUCTION_ITEMS };
