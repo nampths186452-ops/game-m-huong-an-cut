@@ -212,13 +212,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// --- PHẦN MỚI THÊM: KẾT NỐI GIAO DIỆN ---
-app.use(express.static(path.join(__dirname, '../client/dist')));
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-});
-
 // --- CHẠY MÁY CHỦ ---
 const PORT = process.env.PORT || 10000;
 server.listen(PORT, () => {
