@@ -1,4 +1,4 @@
-const questions = [
+const QUESTIONS = [
   {
     id: 1,
     question: "Thuật ngữ 'Kinh tế chính trị' lần đầu tiên xuất hiện trong tác phẩm nào?",
@@ -240,3 +240,4 @@ const questions = [
     correctIndex: 2
   }
 ];
+module.exports = { QUESTIONS };
