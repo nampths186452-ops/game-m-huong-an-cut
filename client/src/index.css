@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .btn-gold {
+    @apply bg-gradient-to-r from-gold-dark via-gold to-gold-dark text-black font-serif font-bold py-3 px-6 rounded shadow-gold-glow hover:scale-105 active:scale-95 transition-all duration-300 uppercase tracking-widest border border-gold-light/50;
+  }
+  .btn-maroon {
+    @apply bg-gradient-to-r from-red-950 to-maroon text-gold-light font-serif font-bold py-3 px-6 rounded shadow-lg hover:scale-105 active:scale-95 transition-all duration-300 uppercase tracking-widest border border-red-900/50;
+  }
+  .card {
+    @apply bg-black/40 backdrop-blur-xl rounded-xl p-8 border border-white/10 shadow-glass;
+  }
+  .text-gold-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-gold-light via-gold to-gold-dark;
+  }
+}
+
+@keyframes flash {
+  0% { background-color: rgba(212, 175, 55, 0.4); }
+  100% { background-color: transparent; }
+}
+.flash-screen { animation: flash 0.6s ease-out; }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px) rotate(-5deg); }
+  75% { transform: translateX(5px) rotate(5deg); }
+}
+.shake-anim:hover { animation: shake 0.5s; }
